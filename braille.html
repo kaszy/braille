@@ -131,11 +131,8 @@
 			}
 
 			function appendCharCode(code) {
-				//$('#tests').append("<p>"+code+"</p>");
 				$newChar = $clone.clone();
 				$('#svg-container').append($newChar);
-
-				//$newChar.children('.dot').removeClass('dot-hidden');
 
 				if (code == "") {
 					//$newChar.children('.dot').remove();
@@ -235,24 +232,6 @@
 				$clone = $('.svg').clone();
 				$('.svg').remove();
 
-				/*appendCharCode("101110");
-				appendCharCode("100000");
-				appendCharCode("011110");
-				appendCharCode("100000");
-				appendCharCode("111000");
-				appendCharCode("010100");
-				appendCharCode("100000");
-				appendCharCode("");
-				appendCharCode("111010");
-				appendCharCode("101001");
-				appendCharCode("010100");
-				appendCharCode("101011");
-
-				appendCharCode("");
-				appendLetter("a");
-				appendCharCode("");*/
-				appendString("Natalia Ruiz");
-
 				$(document).on('mouseenter', '.svg', function(event) {
 					event.preventDefault();
 					var i = $(this).index() + 1;
@@ -284,19 +263,7 @@
 				});
 
 				$('#alter').click(function(event) {
-					/*alterLetter(0, 'N');
-					alterLetter(1, 'a');
-					alterLetter(2, 't');
-					alterLetter(3, 'a');
-					alterLetter(4, 'l');
-					alterLetter(5, 'i');
-					alterLetter(6, 'a');
-					alterLetter(7, ' ');
-					alterLetter(8, 'R');
-					alterLetter(9, 'u');
-					alterLetter(10, 'i');
-					alterLetter(11, 'z');*/
-					alterString("Natalia Ruiz");
+					alterString("Good morning");
 				});
 			});
 		</script>
@@ -310,15 +277,12 @@
 			<div id="svg-container">
 
 				<svg class='svg' width="3em" height="4em">
-
-					<!-- <circle fill="none" stroke="#fff" stroke-width="2" cx="0" cy="0" r="15" /> -->
 					<circle class="dot dot-hidden" cx="1em" cy="1em" style="transform-origin: 1em 1em" r="0.1em" />
 					<circle class="dot dot-hidden" cx="1em" cy="2em" style="transform-origin: 1em 2em" r="0.1em" />
 					<circle class="dot dot-hidden" cx="1em" cy="3em" style="transform-origin: 1em 3em" r="0.1em" />
 					<circle class="dot dot-hidden" cx="2em" cy="1em" style="transform-origin: 2em 1em" r="0.1em" />
 					<circle class="dot dot-hidden" cx="2em" cy="2em" style="transform-origin: 2em 2em" r="0.1em" />
 					<circle class="dot dot-hidden" cx="2em" cy="3em" style="transform-origin: 2em 3em" r="0.1em" />
-
 				</svg>
 
 			</div>
