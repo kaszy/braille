@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Braille</title>
+
+		<style>
+			@import url('https://fonts.googleapis.com/css?family=Josefin+Sans:100,300,400,700');
+
+			html, body {
+			  margin: 0 !important;
+			  padding: 0 !important;
+				background: #1F273E;
+				color: rgba(255, 255, 255, 0.87);
+				font-family: 'Josefin Sans', sans-serif;
+				font-weight: 300;
+			}
+
+			h1 {
+				text-align: center;
+				font-weight: 300;
+				font-size: 7em;
+			}
+
+			#body-wrapper {
+			  position: relative;
+			  margin: auto;
+			  padding: 0;
+			  max-width: 1600px;
+			  padding: 5px;
+			  margin-top: 114px;
+			}
+
+			#svg-container {
+				text-align: center;
+			}
+
+			#normal-text {
+				font-size: 4em;
+				text-align: center;
+			}
+
+			#svg-container * {
+				transition: ease-in-out 0.2s all;
+				/*transition-delay: 0.5s;*/
+			}
+
+			.svg:hover {
+				transform: scale(2);
+
+			}
+
+			.dot {
+				stroke: #fff;
+				stroke-width: 1;
+				fill: #fff;
+
+				opacity: 0.3;
+
+				transition: ease-in-out 1.2s all !important;
+
+				/*transform: scale(1);*/
+
+			}
+
+			.dot-filled {
+				stroke-width: 6;
+				fill: #fff;
+				opacity: 1;
+			}
+
+			.dot-hidden {
+				transform: scale(0);
+				transition: ease-in-out 2s all;
+			}
+
+			.highlight {
+				border: 2px dotted #fff;
+			}
+		</style>
+
+    <meta name="viewport" content="width=device-width, user-scalable=yes">
+
+		<script
+			  src="https://code.jquery.com/jquery-3.2.1.min.js"
+			  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+			  crossorigin="anonymous"></script>
+
+		<script>
+			var braille = new Array();
+			braille['a'] = 0b100000;
+			braille['b'] = 0b110000;
+			braille['c'] = 0b100100;
+			braille['d'] = 0b100110;
+			braille['e'] = 0b100010;
+			braille['f'] = 0b110100;
+			braille['g'] = 0b110110;
+			braille['h'] = 0b110010;
+			braille['i'] = 0b010100;
+			braille['j'] = 0b010110;
+			braille['k'] = 0b101000;
+			braille['l'] = 0b111000;
+			braille['m'] = 0b101100;
+			braille['n'] = 0b101110;
+			braille['o'] = 0b101010;
+			braille['p'] = 0b111100;
+			braille['q'] = 0b111110;
+			braille['r'] = 0b111010;
+			braille['s'] = 0b011100;
+			braille['t'] = 0b011110;
+			braille['u'] = 0b101001;
+			braille['v'] = 0b111001;
+			braille['w'] = 0b010111;
+			braille['x'] = 0b101101;
+			braille['y'] = 0b101111;
+			braille['z'] = 0b101011;
+			braille['#'] = 0b001111;
+			braille['1'] = 0b100000;
+			braille['2'] = 0b110000;
+			braille['3'] = 0b100100;
+			braille['4'] = 0b100110;
+			braille['5'] = 0b100010;
+			braille['6'] = 0b110100;
+			braille['7'] = 0b110110;
+			braille['8'] = 0b110010;
+			braille['9'] = 0b010100;
+			braille['0'] = 0b010110;
+
+			function clearBraille() {
+				$('#svg-container').empty();
+				$('#normal-text').empty();
+			}
+
+			function appendCharCode(code) {
+				//$('#tests').append("<p>"+code+"</p>");
+				$newChar = $clone.clone();
+				$('#svg-container').append($newChar);
+
+				//$newChar.children('.dot').removeClass('dot-hidden');
+
+				if (code == "") {
+					//$newChar.children('.dot').remove();
+				} else {
+					$newChar.children('.dot').each(function(index, el) {
+						if (code.charAt(index) == "1")
+							$(this).addClass('dot-filled');
+						$(this).removeClass('dot-hidden');
+					});
+				}
+			}
+
+			function appendLetter(letter) {
+				//$('#tests').text(braille[letter].toString(2));
+				if (letter == " ") {
+					appendCharCode("");
+					$('#normal-text').append("<span class='white-box'>"+letter+"</span>");
+				} else {
+					$('#normal-text').append("<span class='letter-box'>"+letter+"</span>");
+					letter = letter.toLowerCase();
+					var code = braille[letter].toString(2);
+					code = "000000".substr(code.length) + code;
+					appendCharCode(code);
+				}
+			}
+
+			function appendString(str) {
+				for (var i=0; i<str.length; i++) {
+					appendLetter(str.charAt(i));
+				}
+			}
+
+			function removeLetter(index) {
+				index += 1;
+				$char = $('#svg-container').children('.svg:nth-child('+index+')');
+
+				$char.remove();
+			}
+
+			function alterCharCode(index, code) {
+				index += 1;
+				$char = $('#svg-container').children('.svg:nth-child('+index+')');
+
+				if (code == "") {
+					$char.children('.dot').addClass('dot-hidden');
+				} else {
+					$char.children('.dot').each(function(index, el) {
+						if (code.charAt(index) == "1")
+							$(this).addClass('dot-filled');
+						else
+							$(this).removeClass('dot-filled');
+						$(this).removeClass('dot-hidden');
+					});
+				}
+			}
+
+			function alterLetter(index, letter) {
+				if (letter == " ") {
+					alterCharCode(index, "");
+					index += 1;
+					$('#normal-text').children('span:nth-child('+index+')').text(letter).removeClass('letter-box').addClass('white-box');
+					//$('#normal-text').append("<span class='white-box'>"+letter+"</span>");
+				} else {
+					//var original = letter;
+					var lower = letter.toLowerCase();
+					try {
+						var code = braille[lower].toString(2);
+					}
+					catch(e) {
+						return;
+					}
+					//console.log("|"+letter+"|");
+					code = "000000".substr(code.length) + code;
+					alterCharCode(index, code);
+
+					index += 1;
+					$('#normal-text').children('span:nth-child('+index+')').text(letter).removeClass('white-box').addClass('letter-box');
+				}
+			}
+
+			function alterString(str) {
+				var count = $('#svg-container .svg').length;
+				for (var i=0; i< (str.length - count); i++) {
+					appendLetter(str.charAt(count+i));
+				}
+
+
+				for (var i=0; i<count; i++) {
+					alterLetter(i, str.charAt(i));
+				}
+
+				while ($('#svg-container .svg').length > str.length)
+					removeLetter(str.length-1);
+			}
+
+	    $(document).ready(function(){
+				$clone = $('.svg').clone();
+				$('.svg').remove();
+
+				/*appendCharCode("101110");
+				appendCharCode("100000");
+				appendCharCode("011110");
+				appendCharCode("100000");
+				appendCharCode("111000");
+				appendCharCode("010100");
+				appendCharCode("100000");
+				appendCharCode("");
+				appendCharCode("111010");
+				appendCharCode("101001");
+				appendCharCode("010100");
+				appendCharCode("101011");
+
+				appendCharCode("");
+				appendLetter("a");
+				appendCharCode("");*/
+				appendString("Natalia Ruiz");
+
+				$(document).on('mouseenter', '.svg', function(event) {
+					event.preventDefault();
+					var i = $(this).index() + 1;
+					$('#normal-text').children('span:nth-child('+i+')').addClass('highlight');
+				});
+
+				$(document).on('mouseleave', '.svg', function(event) {
+					event.preventDefault();
+					var i = $(this).index() + 1;
+					$('#normal-text').children('span:nth-child('+i+')').removeClass('highlight');
+				});
+
+				$('#text-to-braille').submit(function(event) {
+					event.preventDefault();
+					//$('h1').text($(this).children('input').val());
+					clearBraille();
+					appendString($(this).children('input').val());
+				});
+
+				$('#text-to-braille input').bind('input', function() {
+					//event.preventDefault();
+					//$('h1').text($(this).children('input').val());
+					clearBraille();
+					appendString($(this).val());
+				});
+
+				$('#hide').click(function(event) {
+					$('.dot').toggleClass('dot-hidden');
+				});
+
+				$('#alter').click(function(event) {
+					/*alterLetter(0, 'N');
+					alterLetter(1, 'a');
+					alterLetter(2, 't');
+					alterLetter(3, 'a');
+					alterLetter(4, 'l');
+					alterLetter(5, 'i');
+					alterLetter(6, 'a');
+					alterLetter(7, ' ');
+					alterLetter(8, 'R');
+					alterLetter(9, 'u');
+					alterLetter(10, 'i');
+					alterLetter(11, 'z');*/
+					alterString("Natalia Ruiz");
+				});
+			});
+		</script>
+
+  </head>
+
+  <body>
+    <div id="body-wrapper">
+			<h1>Braille</h1>
+
+			<div id="svg-container">
+
+				<svg class='svg' width="3em" height="4em">
+
+					<!-- <circle fill="none" stroke="#fff" stroke-width="2" cx="0" cy="0" r="15" /> -->
+					<circle class="dot dot-hidden" cx="1em" cy="1em" style="transform-origin: 1em 1em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="1em" cy="2em" style="transform-origin: 1em 2em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="1em" cy="3em" style="transform-origin: 1em 3em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="2em" cy="1em" style="transform-origin: 2em 1em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="2em" cy="2em" style="transform-origin: 2em 2em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="2em" cy="3em" style="transform-origin: 2em 3em" r="0.1em" />
+
+				</svg>
+
+			</div>
+
+			<p id="normal-text"></p>
+
+			<div id="form-container">
+				<form id="text-to-braille">
+					<input />
+				</form>
+
+				<button id='hide'>Hide</button>
+				<button id='alter'>Alter</button>
+			</div>
+
+			<p id="tests"></p>
+
+    </div>
+
+  </body>
+
+</html>
