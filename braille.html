@@ -56,7 +56,7 @@
 
 				opacity: 0.3;
 
-				transition: ease-in-out 1.2s all !important;
+				transition: cubic-bezier(.41,-0.22,.33,1.61) 1.2s all !important;
 
 				/*transform: scale(1);*/
 
@@ -124,28 +124,47 @@
 			braille['8'] = 0b110010;
 			braille['9'] = 0b010100;
 			braille['0'] = 0b010110;
+			braille[','] = 0b010000;
+			braille['!'] = 0b011010;
+			braille['?'] = 0b011001;
+			braille['-'] = 0b001001;
+			braille['/'] = 0b001100;
+			braille['.'] = 0b010011;
+			braille[':'] = 0b010010;
+			braille[';'] = 0b011000;
+			braille['\'']= 0b001000;
 
 			function clearBraille() {
 				$('#svg-container').empty();
 				$('#normal-text').empty();
 			}
 
-			function appendCharCode(code) {
+			function appendCharCode(code, delay=0) {
+				//$('#tests').append("<p>"+code+"</p>");
 				$newChar = $clone.clone();
 				$('#svg-container').append($newChar);
+
+				//$newChar.children('.dot').removeClass('dot-hidden');
 
 				if (code == "") {
 					//$newChar.children('.dot').remove();
 				} else {
+					//var delay = 20;
 					$newChar.children('.dot').each(function(index, el) {
+						var $dot = $(this);
+						delay+=100;
 						if (code.charAt(index) == "1")
-							$(this).addClass('dot-filled');
-						$(this).removeClass('dot-hidden');
+							$dot.addClass('dot-filled');
+
+						setTimeout(function() {
+							$dot.removeClass('dot-hidden');
+						}, delay);
+						//$(this).removeClass('dot-hidden');
 					});
 				}
 			}
 
-			function appendLetter(letter) {
+			function appendLetter(letter, delay=0) {
 				//$('#tests').text(braille[letter].toString(2));
 				if (letter == " ") {
 					appendCharCode("");
@@ -153,26 +172,34 @@
 				} else {
 					$('#normal-text').append("<span class='letter-box'>"+letter+"</span>");
 					letter = letter.toLowerCase();
-					var code = braille[letter].toString(2);
+					try {
+						var code = braille[letter].toString(2);
+					}
+					catch(e) {
+						return;
+					}
+					//var code = braille[letter].toString(2);
 					code = "000000".substr(code.length) + code;
-					appendCharCode(code);
+					appendCharCode(code, delay);
 				}
 			}
 
 			function appendString(str) {
 				for (var i=0; i<str.length; i++) {
-					appendLetter(str.charAt(i));
+					appendLetter(str.charAt(i), 200 + i*150);
 				}
 			}
 
 			function removeLetter(index) {
 				index += 1;
 				$char = $('#svg-container').children('.svg:nth-child('+index+')');
+				$char.remove();
 
+				$char = $('#normal-text').children('span:nth-child('+index+')');
 				$char.remove();
 			}
 
-			function alterCharCode(index, code) {
+			function alterCharCode(index, code, delay=0) {
 				index += 1;
 				$char = $('#svg-container').children('.svg:nth-child('+index+')');
 
@@ -180,6 +207,7 @@
 					$char.children('.dot').addClass('dot-hidden');
 				} else {
 					$char.children('.dot').each(function(index, el) {
+						delay += 100;
 						if (code.charAt(index) == "1")
 							$(this).addClass('dot-filled');
 						else
@@ -189,7 +217,7 @@
 				}
 			}
 
-			function alterLetter(index, letter) {
+			function alterLetter(index, letter, delay=0) {
 				if (letter == " ") {
 					alterCharCode(index, "");
 					index += 1;
@@ -206,7 +234,7 @@
 					}
 					//console.log("|"+letter+"|");
 					code = "000000".substr(code.length) + code;
-					alterCharCode(index, code);
+					alterCharCode(index, code, delay);
 
 					index += 1;
 					$('#normal-text').children('span:nth-child('+index+')').text(letter).removeClass('white-box').addClass('letter-box');
@@ -221,18 +249,39 @@
 
 
 				for (var i=0; i<count; i++) {
-					alterLetter(i, str.charAt(i));
+					alterLetter(i, str.charAt(i), 200 + i*150);
 				}
 
-				while ($('#svg-container .svg').length > str.length)
+				while ($('#svg-container .svg').length > str.length) {
 					removeLetter(str.length-1);
+				}
 			}
 
 	    $(document).ready(function(){
 				$clone = $('.svg').clone();
 				$('.svg').remove();
-		    
-		    		alterString("Good morning");
+
+				$form = $('.text-to-braille').clone();
+				$form.children('input.text').val('');
+				//$('#form-container').append($form.clone());
+
+				/*appendCharCode("101110");
+				appendCharCode("100000");
+				appendCharCode("011110");
+				appendCharCode("100000");
+				appendCharCode("111000");
+				appendCharCode("010100");
+				appendCharCode("100000");
+				appendCharCode("");
+				appendCharCode("111010");
+				appendCharCode("101001");
+				appendCharCode("010100");
+				appendCharCode("101011");
+
+				appendCharCode("");
+				appendLetter("a");
+				appendCharCode("");*/
+				appendString("Natalia Ruiz");
 
 				$(document).on('mouseenter', '.svg', function(event) {
 					event.preventDefault();
@@ -246,18 +295,34 @@
 					$('#normal-text').children('span:nth-child('+i+')').removeClass('highlight');
 				});
 
-				$('#text-to-braille').submit(function(event) {
+				//$('.text-to-braille').submit(function(event) {
+				$(document).on('submit', '.text-to-braille', function(event) {
 					event.preventDefault();
 					//$('h1').text($(this).children('input').val());
 					clearBraille();
-					appendString($(this).children('input').val());
+					appendString($(this).children('input.text').val());
+					$(this).children('.counter').text($(this).children('input.text').val().length);
 				});
 
-				$('#text-to-braille input').bind('input', function() {
+				$(document).on('click', '.btn-switch', function(event) {
+					event.preventDefault();
+					alterString($(this).parent().children('input.text').val());
+				})
+
+				$(document).on('click', '.btn-delete', function(event) {
+					event.preventDefault();
+					$(this).parent().remove();
+				})
+
+				$('.text-to-braille input.text').bind('input', function() {
 					//event.preventDefault();
 					//$('h1').text($(this).children('input').val());
-					clearBraille();
-					appendString($(this).val());
+					//clearBraille();
+					//appendString($(this).val());
+
+					//alterString($(this).val());
+
+
 				});
 
 				$('#hide').click(function(event) {
@@ -265,7 +330,11 @@
 				});
 
 				$('#alter').click(function(event) {
-					alterString("Good morning");
+					alterString("Natalia Ruiz");
+				});
+
+				$('#new-input').click(function(event) {
+					$('#form-container').append($form.clone());
 				});
 			});
 		</script>
@@ -278,13 +347,16 @@
 
 			<div id="svg-container">
 
-				<svg class='svg' width="3em" height="4em">
-					<circle class="dot dot-hidden" cx="1em" cy="1em" style="transform-origin: 1em 1em" r="0.1em" />
-					<circle class="dot dot-hidden" cx="1em" cy="2em" style="transform-origin: 1em 2em" r="0.1em" />
-					<circle class="dot dot-hidden" cx="1em" cy="3em" style="transform-origin: 1em 3em" r="0.1em" />
-					<circle class="dot dot-hidden" cx="2em" cy="1em" style="transform-origin: 2em 1em" r="0.1em" />
-					<circle class="dot dot-hidden" cx="2em" cy="2em" style="transform-origin: 2em 2em" r="0.1em" />
-					<circle class="dot dot-hidden" cx="2em" cy="3em" style="transform-origin: 2em 3em" r="0.1em" />
+				<svg class='svg' width="2em" height="4em">
+
+					<!-- <circle fill="none" stroke="#fff" stroke-width="2" cx="0" cy="0" r="15" /> -->
+					<circle class="dot dot-hidden" cx="0.5em" cy="1em" style="transform-origin: 0.5em 1em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="0.5em" cy="2em" style="transform-origin: 0.5em 2em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="0.5em" cy="3em" style="transform-origin: 0.5em 3em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="1.5em" cy="1em" style="transform-origin: 1.5em 1em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="1.5em" cy="2em" style="transform-origin: 1.5em 2em" r="0.1em" />
+					<circle class="dot dot-hidden" cx="1.5em" cy="3em" style="transform-origin: 1.5em 3em" r="0.1em" />
+
 				</svg>
 
 			</div>
@@ -292,12 +364,20 @@
 			<p id="normal-text"></p>
 
 			<div id="form-container">
-				<form id="text-to-braille">
-					<input />
+				<form class="text-to-braille">
+					<input class="text" />
+					<span class="counter"></span>
+					<input type="submit" value="Animate reveal" />
+					<button class="btn-switch">Switch to this</button>
+					<button class="btn-delete">Delete</button>
 				</form>
 
-				<button id='hide'>Hide</button>
-				<button id='alter'>Alter</button>
+			</div>
+
+			<div>
+				<button id="new-input">New input</button>
+				<!-- <button id='hide'>Hide</button>
+				<button id='alter'>Alter</button> -->
 			</div>
 
 			<p id="tests"></p>
